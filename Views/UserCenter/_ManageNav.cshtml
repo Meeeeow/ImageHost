@@ -1,0 +1,7 @@
+@using ImageHost.Views.UserCenter
+@inject SignInManager<ApplicationUser> SignInManager
+
+<div class="nav nav-pills flex-column nav-stacked">
+    <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" asp-action="Index">Profile</a>
+    <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" asp-action="ChangePassword">Password</a>
+</div>

@@ -7,7 +7,7 @@
 {
     <form asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="ml-auto">
         <div class="navbar-nav">
-            <a class="nav-item nav-link" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+            <a class="nav-item nav-link" asp-controller="UserCenter" asp-action="Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
             <button class="btn btn-link nav-item nav-link">Logout</button>
         </div>
     </form>
