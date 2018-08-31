@@ -179,6 +179,40 @@ namespace ImageHost.Controllers
 
             return RedirectToAction(nameof(SetPassword));
         }
+
+        [HttpGet]
+        public IActionResult Advanced()
+        {
+            var model = new AdvancedViewModel { StatusMessage = StatusMessage };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount(AdvancedViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                StatusMessage = "Please select the checkbox to confirm this danger action.";
+                return RedirectToAction(nameof(Advanced));
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+            var deleteUserResult = await _userManager.DeleteAsync(user);
+
+            if (!deleteUserResult.Succeeded)
+            {
+                AddErrors(deleteUserResult);
+                return View("Advanced", model);
+            }
+            
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(Index));
+        }
         
         #region Helpers
 
