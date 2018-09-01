@@ -193,7 +193,7 @@ namespace ImageHost.Controllers
         {
             if (!ModelState.IsValid)
             {
-                StatusMessage = "Please select the checkbox to confirm this danger action.";
+                StatusMessage = "Error: Please select the checkbox to confirm this danger action.";
                 return RedirectToAction(nameof(Advanced));
             }
 
