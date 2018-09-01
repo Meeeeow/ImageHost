@@ -58,6 +58,46 @@ namespace ImageHost.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(IndexViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var userName = user.UserName;
+            if (model.Username != userName)
+            {
+                var setUserNameResult = await _userManager.SetUserNameAsync(user, model.Username);
+                if (!setUserNameResult.Succeeded)
+                {
+                    AddErrors(setUserNameResult);
+                    model.IsEmailConfirmed = user.EmailConfirmed;
+                    return View(model);
+                }
+            }
+
+            var email = user.Email;
+            if (model.Email != email)
+            {
+                var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
+                if (!setEmailResult.Succeeded)
+                {
+                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
+                }
+            }
+
+            StatusMessage = "Your profile has been updated";
+            return RedirectToAction(nameof(Index));
+        }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
