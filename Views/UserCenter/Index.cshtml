@@ -20,7 +20,11 @@
                 {
                     <div class="input-group">
                         <input asp-for="Email" class="form-control" />
-                        <span class="input-group-addon" aria-hidden="true"><span class="glyphicon glyphicon-ok text-success"></span></span>
+                        <span class="input-group-append" aria-hidden="true">
+                            <span class="input-group-text text-success">
+                                <ion-icon name="checkmark-circle"></ion-icon>
+                            </span>
+                        </span>
                     </div>
                 }
                 else

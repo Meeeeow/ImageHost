@@ -9,15 +9,15 @@
     <div class="col-md-9">
         <form method="post" class="was-validated">
             <div class="custom-control custom-checkbox mt-1 mb-3">
-                <input asp-for="Confirm" type="checkbox" class="custom-control-input" id="delete-confirm" required>
-                <label class="custom-control-label" for="delete-confirm">I confirm all action in this page may cause data loss.</label>
+                <input asp-for="Confirm" type="checkbox" class="custom-control-input" id="action-confirm" required>
+                <label class="custom-control-label" for="action-confirm">I confirm all action in this page may cause data loss.</label>
             </div>
             
             <h5 class="mb-3 mt-3">Delete my account</h5>
             <button asp-action="DeleteAccount" class="btn btn-danger">Delete my account</button>
 
             <h5 class="mb-3 mt-3">Other action</h5>
-            <button class="btn btn-light">Set email as confirmed</button>
+            <button asp-action="ManualConfirmEmail" class="btn btn-light">Set email as confirmed</button>
         </form>
     </div>
 </div>

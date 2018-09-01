@@ -213,6 +213,35 @@ namespace ImageHost.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManualConfirmEmail(AdvancedViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                StatusMessage = "Error: Please select the checkbox to confirm this danger action.";
+                return RedirectToAction(nameof(Advanced));
+            }
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                AddErrors(result);
+                return View("Advanced", model);
+            }
+
+            StatusMessage = "Email address confirmed.";
+            return RedirectToAction(nameof(Index));
+        }
+        
         
         #region Helpers
 
