@@ -1,0 +1,113 @@
+@model AwsViewModel
+@using Amazon
+
+@{
+    ViewData["Title"] = "AWS Settings";
+    ViewData.AddActivePage(SettingsNavPages.AwsSettings);
+}
+<partial name="_StatusMessage" model="Model.StatusMessage"/>
+<div class="row">
+    <div class="col-md-12">
+        <h4>AWS credential profiles</h4>
+        <table class="table table-hover table-bordered">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Region</th>
+                <th>Access Key</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            @{
+                var i = 0;
+            }
+            @foreach (var profile in ViewBag.Profiles)
+            {
+                <tr>
+                    <th scope="row">@i</th>
+                    <td>@profile.Name</td>
+                    <td>@profile.Region</td>
+                    <td>@profile.Options.AccessKey</td>
+                    <td>
+                        <a
+                            asp-action="DeleteAwsProfile"
+                            asp-route-id="@profile.Name"
+                            class="btn btn-sm btn-outline-danger"
+                        >
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+                i++;
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        @using (Html.BeginForm("SetAwsActiveProfile", "Settings", FormMethod.Post))
+        {
+            <h4 class="mt-5">Active credential profile</h4>
+            <div class="input-group pl-0">
+                @if (ViewBag.Profiles.Count > 0)
+                {
+                    <select class="custom-select" asp-for="ActiveProfileViewModel.ActiveProfileName">
+                        <option selected disabled value="">Not selected</option>
+                        @foreach (var profile in ViewBag.Profiles)
+                        {
+                            <option value="@profile.Name">@profile.Name (@profile.Options.AccessKey)</option>
+                        }
+                    </select>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary">Save</button>
+                    </div>
+                }
+                else
+                {
+                    <strong>No credential profile available</strong>
+                }
+            </div>
+            <span asp-validation-for="ActiveProfileViewModel.ActiveProfileName" class="text-danger"></span>
+        }
+
+        @using (Html.BeginForm("AddAwsProfile", "Settings", FormMethod.Post))
+        {
+            <h4 class="mt-5">Add credential profile</h4>
+            <div class="form-group">
+                <label asp-for="AddProfileViewModel.ProfileName"></label>
+                <input asp-for="AddProfileViewModel.ProfileName" class="form-control"/>
+                <span asp-validation-for="AddProfileViewModel.ProfileName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AddProfileViewModel.Region"></label>
+                <select asp-for="AddProfileViewModel.Region" class="custom-select">
+                    <option selected disabled value="">Please select a region</option>
+                    @foreach (var region in RegionEndpoint.EnumerableAllRegions)
+                    {
+                        <option value="@region.SystemName">@region.DisplayName (@region.SystemName)</option>
+                    }
+                </select>
+                <span asp-validation-for="AddProfileViewModel.Region" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AddProfileViewModel.AccessKey"></label>
+                <input asp-for="AddProfileViewModel.AccessKey" class="form-control"/>
+                <span asp-validation-for="AddProfileViewModel.AccessKey" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AddProfileViewModel.SecretKey"></label>
+                <input asp-for="AddProfileViewModel.SecretKey" class="form-control"/>
+                <span asp-validation-for="AddProfileViewModel.SecretKey" class="text-danger"></span>
+            </div>
+            <button class="btn btn-success">Add</button>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

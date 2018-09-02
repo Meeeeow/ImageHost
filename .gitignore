@@ -5,3 +5,4 @@ bin
 development.db
 production.db
 obj
+Migrations

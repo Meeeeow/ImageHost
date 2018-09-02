@@ -77,6 +77,7 @@ namespace ImageHost
             });
 
             services.AddTransient<IEmailSender, EmailSender>();
+            services.AddTransient<ISettingsHelper, SettingsHelper>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
@@ -104,7 +105,7 @@ namespace ImageHost
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "/{action=Index}/{id?}",
+                    template: "{controller}/{action=Index}/{id?}",
                     defaults: new { Controller = "Home" }
                 );
             });
