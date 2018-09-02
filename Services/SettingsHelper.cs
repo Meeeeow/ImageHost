@@ -1,9 +1,7 @@
-using System.Linq;
 using System.Threading.Tasks;
 using ImageHost.Data;
 using ImageHost.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace ImageHost.Services
 {
