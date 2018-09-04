@@ -3,10 +3,14 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.1</TargetFramework>
         <UserSecretsId>aspnet-ImageHost-08EFDF99-16D3-41D3-93B3-80801C7C566A</UserSecretsId>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugSymbols>false</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="development.db" CopyToOutputDirectory="PreserveNewest" />
         <None Update="production.db" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
