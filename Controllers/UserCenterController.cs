@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace ImageHost.Controllers
 {
     [Authorize]
-    [Route("[controller]/[action]")]
     public class UserCenterController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;

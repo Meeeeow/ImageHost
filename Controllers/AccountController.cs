@@ -13,7 +13,6 @@ using ImageHost.Services;
 namespace ImageHost.Controllers
 {
     [Authorize]
-    [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
