@@ -74,6 +74,16 @@
             <span asp-validation-for="ActiveProfileViewModel.ActiveProfileName" class="text-danger"></span>
         }
 
+        @using (Html.BeginForm("SetS3BucketName", "Settings", FormMethod.Post))
+        {
+            <h4 class="mt-5">S3 bucket name</h4>
+            <div class="form-group">
+                <input asp-for="SetS3BucketViewModel.BucketName" value="@Model.SetS3BucketViewModel.BucketName" class="form-control" />
+                <span asp-validation-for="SetS3BucketViewModel.BucketName"  class="text-danger"></span>
+            </div>
+            <button class="btn btn-primary">Save</button>
+        }
+        
         @using (Html.BeginForm("AddAwsProfile", "Settings", FormMethod.Post))
         {
             <h4 class="mt-5">Add credential profile</h4>
@@ -103,7 +113,7 @@
                 <input asp-for="AddProfileViewModel.SecretKey" class="form-control"/>
                 <span asp-validation-for="AddProfileViewModel.SecretKey" class="text-danger"></span>
             </div>
-            <button class="btn btn-success">Add</button>
+            <button class="btn btn-primary">Add</button>
         }
     </div>
 </div>

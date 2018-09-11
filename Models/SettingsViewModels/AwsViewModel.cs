@@ -8,5 +8,8 @@ namespace ImageHost.Models.SettingsViewModels
 
         public ActiveProfileViewModel ActiveProfileViewModel { get; set; }
         public AddProfileViewModel AddProfileViewModel { get; set; }
+        
+        [Display(Name = "Bucket name")]
+        public SetS3BucketViewModel SetS3BucketViewModel { get; set; }
     }
 }

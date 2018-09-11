@@ -47,6 +47,10 @@ namespace ImageHost.Controllers
                 ActiveProfileViewModel = new ActiveProfileViewModel
                 {
                     ActiveProfileName = await _settingsHelper.Get("AwsActiveProfile")
+                },
+                SetS3BucketViewModel = new SetS3BucketViewModel
+                {
+                    BucketName = await _settingsHelper.Get("S3BucketName")
                 }
             });
         }
@@ -58,6 +62,15 @@ namespace ImageHost.Controllers
             var profileName = model.ActiveProfileViewModel.ActiveProfileName;
             await _settingsHelper.Write("AwsActiveProfile", profileName);
             StatusMessage = $"Successful set '{profileName}' as active profile";
+            return RedirectToAction(nameof(AwsSettings));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetS3BucketName(AwsViewModel model)
+        {
+            await _settingsHelper.Write("S3BucketName", model.SetS3BucketViewModel.BucketName);
+
             return RedirectToAction(nameof(AwsSettings));
         }
 
