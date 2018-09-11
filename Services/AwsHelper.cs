@@ -17,6 +17,7 @@ namespace ImageHost.Services
 
         public async Task<AmazonS3Client> GetS3Client()
         {
+            // TODO: Remove or implement proxy setting after development
             Amazon.AWSConfigs.ProxyConfig.Host = "socks5://127.0.0.1";
             Amazon.AWSConfigs.ProxyConfig.Port = 1082;
             var store = new CredentialProfileStoreChain();
