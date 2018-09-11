@@ -44,11 +44,11 @@ namespace ImageHost.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
-            var list = await _context.Albums.ToListAsync();
+            var list = await _context.Albums.Where(album => album.OwnBy == user).ToListAsync();
             
             return View(new IndexViewModel { AlbumListViewModel = new AlbumListViewModel
             {
-                Albums = await _context.Albums.ToListAsync()
+                Albums = list
             }});
         }
 
