@@ -78,6 +78,7 @@ namespace ImageHost
 
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<ISettingsHelper, SettingsHelper>();
+            services.AddTransient<IAwsHelper, AwsHelper>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }

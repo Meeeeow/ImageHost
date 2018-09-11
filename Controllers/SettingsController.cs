@@ -109,7 +109,7 @@ namespace ImageHost.Controllers
 
             new CredentialProfileStoreChain().UnregisterProfile(id);
 
-            var activeProfileName = await _settingsHelper.Get("ActiveAwsProfile");
+            var activeProfileName = await _settingsHelper.Get("AwsActiveProfile");
             if (activeProfileName == id)
             {
                 _settingsHelper.Delete(id);

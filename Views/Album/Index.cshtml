@@ -4,7 +4,7 @@
 }
 
 <div class="d-flex justify-content-between">
-    <h4 class="d-inline">Album</h4>
+    <h2 class="d-inline">Album</h2>
     <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Create</button>
 </div>
 <hr/>
@@ -23,7 +23,7 @@
                                 @(album.IsPrivate ? "Private" : "Public")
                             </span>
                         </p>
-                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                        <a asp-action="Detail" asp-route-id="@album.Id" class="btn btn-primary">Go somewhere</a>
                     </div>
                 </div>
             </div>     
@@ -40,7 +40,7 @@
 <div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            @using (Html.BeginForm("Create", "Albums", FormMethod.Post))
+            @using (Html.BeginForm("Create", "Album", FormMethod.Post))
             {
                 <div class="modal-header">
                     <h5 class="modal-title">Create new album</h5>
