@@ -46,11 +46,11 @@ namespace ImageHost.Controllers
                 StatusMessage = StatusMessage,
                 ActiveProfileViewModel = new ActiveProfileViewModel
                 {
-                    ActiveProfileName = await _settingsHelper.Get("AwsActiveProfile")
+                    ActiveProfileName = await _settingsHelper.Get(Settings.AwsActiveProfile)
                 },
                 SetS3BucketViewModel = new SetS3BucketViewModel
                 {
-                    BucketName = await _settingsHelper.Get("S3BucketName")
+                    BucketName = await _settingsHelper.Get(Settings.S3BucketName)
                 }
             });
         }
@@ -60,7 +60,7 @@ namespace ImageHost.Controllers
         public async Task<IActionResult> SetAwsActiveProfile(AwsViewModel model)
         {
             var profileName = model.ActiveProfileViewModel.ActiveProfileName;
-            await _settingsHelper.Write("AwsActiveProfile", profileName);
+            await _settingsHelper.Write(Settings.AwsActiveProfile, profileName);
             StatusMessage = $"Successful set '{profileName}' as active profile";
             return RedirectToAction(nameof(AwsSettings));
         }
@@ -69,7 +69,7 @@ namespace ImageHost.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetS3BucketName(AwsViewModel model)
         {
-            await _settingsHelper.Write("S3BucketName", model.SetS3BucketViewModel.BucketName);
+            await _settingsHelper.Write(Settings.S3BucketName, model.SetS3BucketViewModel.BucketName);
 
             return RedirectToAction(nameof(AwsSettings));
         }
@@ -109,10 +109,10 @@ namespace ImageHost.Controllers
 
             new CredentialProfileStoreChain().UnregisterProfile(id);
 
-            var activeProfileName = await _settingsHelper.Get("AwsActiveProfile");
+            var activeProfileName = await _settingsHelper.Get(Settings.AwsActiveProfile);
             if (activeProfileName == id)
             {
-                _settingsHelper.Delete(id);
+                _settingsHelper.Delete(activeProfileName);
             }
 
             StatusMessage = $"Profile '{id}' was deleted";

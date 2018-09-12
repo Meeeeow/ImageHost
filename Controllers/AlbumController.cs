@@ -113,7 +113,7 @@ namespace ImageHost.Controllers
                 return RedirectToAction(nameof(Detail), new {id = albumId});
             }
             
-            var bucketName = await _settingsHelper.Get("S3BucketName");
+            var bucketName = await _settingsHelper.Get(Settings.S3BucketName);
             if (string.IsNullOrEmpty(bucketName))
             {
                 throw new Exception("No S3 bucket name was set.");
