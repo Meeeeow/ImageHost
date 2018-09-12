@@ -1,0 +1,25 @@
+@{
+    Image image = ViewBag.Image;
+    ViewData["Title"] = image.Name;
+}
+<div class="d-flex justify-content-between">
+    <h2 class="d-inline">@image.Name</h2>
+    <div class="align-content-end d-flex align-items-center">
+        <span class="d-flex mr-2 align-items-center">
+            <ion-icon class="mr-1" name="time"></ion-icon>
+            @image.UploadTimeUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
+        </span>
+        <span class="d-flex mr-2 align-items-center">
+            <ion-icon class="mr-1" name="information-circle-outline"></ion-icon>
+            @ViewBag.ImageSize
+        </span>
+        <span class="d-flex mr-2 align-items-center">
+            <ion-icon class="mr-1" name="person"></ion-icon>
+            @image.OwnBy
+        </span>
+    </div>
+</div>
+<hr/>
+<div class="d-flex justify-content-center align-items-center">
+    <img src="@ViewBag.ImageLink" style="max-height: 100%; max-width: 100%; height: auto; width: auto;"/>
+</div>
