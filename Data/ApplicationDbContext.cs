@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ImageHost.Models;
@@ -22,6 +23,13 @@ namespace ImageHost.Data
 
             builder.Entity<Album>()
                 .HasOne(a => a.CoverImage);
+
+            builder.Entity<Setting>()
+                .HasData(new Setting
+                {
+                    Key = Data.Settings.ImageCacheTime,
+                    Val = TimeSpan.FromDays(7).ToString()
+                });
             
             base.OnModelCreating(builder);
         }

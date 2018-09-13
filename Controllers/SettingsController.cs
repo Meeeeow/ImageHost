@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Amazon;
 using Microsoft.AspNetCore.Authorization;
@@ -28,9 +29,26 @@ namespace ImageHost.Controllers
         public string StatusMessage { get; set; }
         
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            return View(new BasicSettingViewModel
+            {
+                ImageCacheTime = TimeSpan.Parse(await _settingsHelper.Get(Settings.ImageCacheTime)),
+                StatusMessage = StatusMessage
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(BasicSettingViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                StatusMessage = $"Image cache time was changed to {model.ImageCacheTime.TotalMinutes} minutes";
+                await _settingsHelper.Write(Settings.ImageCacheTime, model.ImageCacheTime.ToString());
+            }
+            
+            return RedirectToAction(nameof(Index));
         }
 
         #region AWS

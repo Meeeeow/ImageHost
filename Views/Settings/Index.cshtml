@@ -1,15 +1,26 @@
+@model BasicSettingViewModel
 @{
     ViewData["Title"] = "Basic settings";
     ViewData.AddActivePage(SettingsNavPages.Index);
 }
 
 <h4>@ViewData["Title"]</h4>
-@* <partial name="_StatusMessage" model="Model.StatusMessage"/> *@
+<partial name="_StatusMessage" model="Model.StatusMessage"/>
 <div class="row">
     <div class="col-md-6">
-        <form method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-
+        <form method="post" asp-action="Index">
+            <div class="form-group">
+                <label asp-for="ImageCacheMinutes"></label>
+                <div class="input-group">
+                    <input asp-for="ImageCacheMinutes" class="form-control"/>
+                    <div class="input-group-append">
+                        <span class="input-group-text">Minutes</span>
+                    </div>
+                </div>
+                <span asp-validation-for="ImageCacheMinutes" class="text-danger"></span>
+            </div>
+            
+            <button class="btn btn-primary" type="submit">Save</button>
         </form>
     </div>
 </div>
