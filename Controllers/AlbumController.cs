@@ -23,7 +23,7 @@ namespace ImageHost.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ISettingsHelper _settingsHelper;
         private readonly IAwsHelper _awsHelper;
-        
+
         [TempData]
         public string StatusMessage { get; set; }
         
@@ -73,9 +73,14 @@ namespace ImageHost.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Detail(string id)
         {
             var album = await _context.Albums.FindAsync(id);
+            var user = await _userManager.GetUserAsync(User);
+            
+            if (!HasPermissionTo(user, album)) return Unauthorized();
+            
             return View(new DetailViewModel
             {
                 Album = album,
@@ -130,5 +135,15 @@ namespace ImageHost.Controllers
 
             return RedirectToAction(nameof(Detail), new { id = albumId });
         }
+        
+        #region Helper
+        
+        private bool HasPermissionTo(ApplicationUser user, Album album)
+        {
+            if (!album.IsPrivate) return true;
+            return User.Identity.IsAuthenticated && album.OwnBy == user;
+        }
+        
+        #endregion
     }
 }
