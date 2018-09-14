@@ -14,6 +14,39 @@
 <hr/>
 <partial name="_StatusMessage" model="Model.StatusMessage"/>
 
+<div class="row album-list">
+    @if (Model.Album.Images.Any())
+    {
+        foreach (var image in Model.Album.Images)
+        {
+            <a class="col-lg-3 mb-3" asp-action="Detail" asp-controller="Image" asp-route-id="@image.Id">
+                <div class="card">
+                    <img class="card-img-top" src="@Url.Action("Direct", "Image", new { id = image.Id })">
+                    <div class="card-body">
+                        <h5 class="card-title">@image.Name</h5>
+                        <p class="card-text mt-4">
+                            <span class="d-flex align-items-center">
+                                <ion-icon class="mr-1" name="information-circle-outline"></ion-icon>
+                                @Converter.ByteToReadableString(image.FileSize)
+                            </span>
+                            <span class="d-flex align-items-center">
+                                <ion-icon class="mr-1" name="time"></ion-icon>
+                                @image.UploadTimeUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="col m-5 d-flex justify-content-center">
+            <strong> No image yet.</strong>
+        </div>
+    }
+</div>
+
 <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

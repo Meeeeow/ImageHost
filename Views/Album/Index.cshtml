@@ -8,25 +8,26 @@
     <button class="btn btn-primary" data-toggle="modal" data-target="#createModal">Create</button>
 </div>
 <hr/>
-<div class="row">
+<div class="row image-list">
     @if (Model.AlbumListViewModel.Albums.Any())
     {
         foreach (var album in Model.AlbumListViewModel.Albums)
         {
-            <div class="col-lg-3 mb-3">
+            <a class="col-lg-3 mb-3" asp-action="Detail" asp-route-id="@album.Id">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">@album.Name</h5>
                         <p class="card-text">
+                            <br/>
                             @album.Id
-                            <span class="d-block @(album.IsPrivate ? "text-primary" : "text-secondary")">
+                            <strong class="d-block @(album.IsPrivate ? "text-primary" : "text-secondary")">
                                 @(album.IsPrivate ? "Private" : "Public")
-                            </span>
+                            </strong>
                         </p>
-                        <a asp-action="Detail" asp-route-id="@album.Id" class="btn btn-primary">Go somewhere</a>
                     </div>
                 </div>
-            </div>     
+            </a>
+            
         }
     }
     else

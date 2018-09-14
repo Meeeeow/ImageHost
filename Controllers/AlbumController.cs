@@ -76,7 +76,10 @@ namespace ImageHost.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Detail(string id)
         {
-            var album = await _context.Albums.FindAsync(id);
+            var album = await _context.Albums
+                .Include(a => a.Images)
+                .SingleAsync(a => a.Id == id);
+            
             var user = await _userManager.GetUserAsync(User);
             
             if (!HasPermissionTo(user, album)) return Unauthorized();

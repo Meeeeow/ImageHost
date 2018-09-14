@@ -1,0 +1,14 @@
+.album-list a,
+.image-list a {
+    color: inherit;
+}
+
+.album-list a:hover,
+.image-list a:hover {
+    text-decoration: none;
+}
+
+.album-list a:hover .card,
+.image-list a:hover .card {
+    border: 1px solid grey;
+}
