@@ -11,7 +11,7 @@
         </span>
         <span class="d-flex mr-2 align-items-center">
             <ion-icon class="mr-1" name="information-circle-outline"></ion-icon>
-            @ViewBag.ImageSize
+            @Converter.ByteToReadableString(image.FileSize)
         </span>
         <span class="d-flex mr-2 align-items-center">
             <ion-icon class="mr-1" name="person"></ion-icon>
