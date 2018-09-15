@@ -25,6 +25,7 @@ namespace ImageHost.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ISettingsHelper _settingsHelper;
         private readonly IAwsHelper _awsHelper;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -33,13 +34,15 @@ namespace ImageHost.Controllers
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             ISettingsHelper settingsHelper,
-            IAwsHelper awsHelper
+            IAwsHelper awsHelper,
+            SignInManager<ApplicationUser> signInManager
         )
         {
             _context = context;
             _userManager = userManager;
             _awsHelper = awsHelper;
             _settingsHelper = settingsHelper;
+            _signInManager = signInManager;
         }
         
         [HttpGet]
@@ -82,9 +85,8 @@ namespace ImageHost.Controllers
                 .Include(a => a.Images)
                 .SingleAsync(a => a.Id == id);
             
-            var user = await _userManager.GetUserAsync(User);
             
-            if (!HasPermissionTo(user, album)) return Unauthorized();
+            if (!await HasPermissionTo(album)) return Unauthorized();
             
             return View(new DetailViewModel
             {
@@ -162,10 +164,11 @@ namespace ImageHost.Controllers
         
         #region Helper
         
-        private bool HasPermissionTo(ApplicationUser user, Album album)
+        private async Task<bool> HasPermissionTo(Album album)
         {
+            var user = await _userManager.GetUserAsync(User);
             if (!album.IsPrivate) return true;
-            return User.Identity.IsAuthenticated && album.OwnBy == user;
+            return _signInManager.IsSignedIn(User) && album.OwnBy == user;
         }
 
         private System.Drawing.Image ImageToThumbnail(System.Drawing.Image originImage)

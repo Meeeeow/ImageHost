@@ -2,6 +2,8 @@
     Image image = ViewBag.Image;
     ViewData["Title"] = image.Name;
 }
+@inject SignInManager<ApplicationUser> SignInManager
+
 <div class="d-flex justify-content-between">
     <h2 class="d-inline">@image.Name</h2>
     <div class="align-content-end d-flex align-items-center">
@@ -14,14 +16,17 @@
             >
                 <ion-icon name="eye"></ion-icon>
             </button>
-            <button
-                class="btn btn-danger"
-                title="Delete"
-                asp-action="Delete"
-                asp-route-id="@image.Id"
-            >
-                <ion-icon name="trash"></ion-icon>
-            </button>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <button
+                    class="btn btn-danger"
+                    title="Delete"
+                    asp-action="Delete"
+                    asp-route-id="@image.Id"
+                >
+                    <ion-icon name="trash"></ion-icon>
+                </button>
+            }
         </form>
     </div>
 </div>
@@ -40,6 +45,31 @@
     </span>
 </div>
 <hr/>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#direct" role="tab">Direct link</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#detail" role="tab">Detail link</a>
+    </li>
+</ul>
+
+<div class="tab-content mt-1 mb-3" id="links">
+    <div class="tab-pane fade show active" id="direct" role="tabpanel">
+        <input 
+            class="form-control"
+            value="@Url.Action("Direct", "Image", new { id = image.Id }, Context.Request.Scheme )"
+            onclick="this.select()"
+        />
+    </div>
+    <div class="tab-pane fade" id="detail" role="tabpanel">
+        <input
+            class="form-control"
+            value="@Url.Action("Detail", "Image", new { id = image.Id }, Context.Request.Scheme)"
+            onclick="this.select()"
+        />
+    </div>
+</div>
 <div class="d-flex justify-content-center align-items-center">
     <img src="@ViewBag.ImageLink" style="max-height: 100%; max-width: 100%; height: auto; width: auto;"/>
 </div>

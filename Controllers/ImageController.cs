@@ -16,18 +16,21 @@ namespace ImageHost.Controllers {
         private readonly IAwsHelper _awsHelper;
         private readonly ISettingsHelper _settingsHelper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public ImageController(
             ApplicationDbContext context,
             IAwsHelper awsHelper,
             ISettingsHelper settingsHelper,
-            UserManager<ApplicationUser> userManager
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
         )
         {
             _context = context;
             _awsHelper = awsHelper;
             _settingsHelper = settingsHelper;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         
         [HttpGet]
@@ -97,6 +100,8 @@ namespace ImageHost.Controllers {
         [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
+            if (!_signInManager.IsSignedIn(User)) return Unauthorized();
+            
             var image = await _context.Images
                 .Include(i => i.OwnBy)
                 .Include(i => i.Album)
@@ -132,7 +137,7 @@ namespace ImageHost.Controllers {
             
             if (!image.Album.IsPrivate) return true;
             
-            return User.Identity.IsAuthenticated && image.OwnBy == user;
+            return _signInManager.IsSignedIn(User) && image.OwnBy == user;
         }
         #endregion
     }
