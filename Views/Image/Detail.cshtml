@@ -5,19 +5,39 @@
 <div class="d-flex justify-content-between">
     <h2 class="d-inline">@image.Name</h2>
     <div class="align-content-end d-flex align-items-center">
-        <span class="d-flex mr-2 align-items-center">
-            <ion-icon class="mr-1" name="time"></ion-icon>
-            @image.UploadTimeUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
-        </span>
-        <span class="d-flex mr-2 align-items-center">
-            <ion-icon class="mr-1" name="information-circle-outline"></ion-icon>
-            @Converter.ByteToReadableString(image.FileSize)
-        </span>
-        <span class="d-flex mr-2 align-items-center">
-            <ion-icon class="mr-1" name="person"></ion-icon>
-            @image.OwnBy
-        </span>
+        <form method="get">
+            <button
+                class="btn btn-outline-dark mr-2"
+                title="View image"
+                asp-action="Direct"
+                asp-route-id="@image.Id"
+            >
+                <ion-icon name="eye"></ion-icon>
+            </button>
+            <button
+                class="btn btn-danger"
+                title="Delete"
+                asp-action="Delete"
+                asp-route-id="@image.Id"
+            >
+                <ion-icon name="trash"></ion-icon>
+            </button>
+        </form>
     </div>
+</div>
+<div class="mt-2 d-flex align-items-center">
+    <span class="d-flex mr-2 align-items-center">
+        <ion-icon class="mr-1" name="time"></ion-icon>
+        @image.UploadTimeUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")
+    </span>
+    <span class="d-flex mr-2 align-items-center">
+        <ion-icon class="mr-1" name="information-circle-outline"></ion-icon>
+        @Converter.ByteToReadableString(image.FileSize)
+    </span>
+    <span class="d-flex mr-2 align-items-center">
+        <ion-icon class="mr-1" name="person"></ion-icon>
+        @image.OwnBy
+    </span>
 </div>
 <hr/>
 <div class="d-flex justify-content-center align-items-center">

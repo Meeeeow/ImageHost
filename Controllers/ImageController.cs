@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.S3.Model;
 using ImageHost.Data;
@@ -38,7 +39,7 @@ namespace ImageHost.Controllers {
                 .Include(i => i.Album)
                 .SingleAsync(i => i.Id == id);
 
-            if (!HasPermissionToImage(user, image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Unauthorized();
             
             if (image == null)
             {
@@ -57,14 +58,13 @@ namespace ImageHost.Controllers {
         [HttpGet]
         public async Task<IActionResult> Direct(string id, bool? thumbnail)
         {
-            var user = await _userManager.GetUserAsync(User);
             var image = await _context.Images
                 .Include(i => i.OwnBy)
                 .Include(i => i.Album)
                 .SingleAsync(i => i.Id == id);
                 
             if (image == null) return NotFound();
-            if (!HasPermissionToImage(user, image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Unauthorized();
 
             var headerValue = Request.Headers["If-Modified-Since"];
             if (!string.IsNullOrEmpty(headerValue))
@@ -93,11 +93,43 @@ namespace ImageHost.Controllers {
             HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={expireTime.TotalSeconds}");
             return Redirect(link);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var image = await _context.Images
+                .Include(i => i.OwnBy)
+                .Include(i => i.Album)
+                .SingleAsync(i => i.Id == id);
+                
+            if (image == null) return NotFound();
+            if (!await HasPermissionToImage(image)) return Unauthorized();
+
+            var objects = new List<KeyVersion>
+            {
+                new KeyVersion { Key = id}
+            };
+            if (image.HasThumbnail) objects.Add(new KeyVersion { Key = $"thumbnail/{id}" });
+            
+            var s3 = await _awsHelper.GetS3Client();
+            await s3.DeleteObjectsAsync(new DeleteObjectsRequest
+            {
+                BucketName = await _settingsHelper.Get(Settings.S3BucketName),
+                Objects = objects
+            });
+
+            _context.Images.Remove(image);
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Detail), nameof(Album), new {id = image.Album.Id});
+        }
         
         #region Helper
 
-        private bool HasPermissionToImage(ApplicationUser user, Image image)
+        private async Task<bool> HasPermissionToImage(Image image)
         {
+            var user = await _userManager.GetUserAsync(User);
+            
             if (!image.Album.IsPrivate) return true;
             
             return User.Identity.IsAuthenticated && image.OwnBy == user;
