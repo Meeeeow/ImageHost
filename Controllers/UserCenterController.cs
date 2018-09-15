@@ -300,7 +300,7 @@ namespace ImageHost.Controllers
             }
             else
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(AlbumController.Index), "Album");
             }
         }
 

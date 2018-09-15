@@ -26,6 +26,13 @@
     <ItemGroup>
         <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.8.391" />
     </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Home\About.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Contact.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
+    </ItemGroup>
     
     <Target Name="BundleResource" BeforeTargets="BeforeBuild">
         <Message Text="### Bundle resource ###" Importance="high" />

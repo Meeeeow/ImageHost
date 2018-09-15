@@ -92,7 +92,7 @@ namespace ImageHost.Controllers
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            return RedirectToAction(nameof(HomeController.Index), "Home");
+            return RedirectToAction(nameof(AlbumController.Index), "Album");
         }
 
 
@@ -155,7 +155,7 @@ namespace ImageHost.Controllers
         {
             if (userId == null || code == null)
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(AlbumController.Index), "Album");
             }
 
             var user = await _userManager.FindByIdAsync(userId);
@@ -275,7 +275,7 @@ namespace ImageHost.Controllers
             }
             else
             {
-                return RedirectToAction(nameof(HomeController.Index), "Home");
+                return RedirectToAction(nameof(AlbumController.Index), "Album");
             }
         }
 

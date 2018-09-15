@@ -89,8 +89,8 @@ namespace ImageHost
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
+                // app.UseExceptionHandler("/Home/Error");
+                // app.UseHsts();
             }
 
             // app.UseHttpsRedirection();
@@ -103,7 +103,7 @@ namespace ImageHost
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}",
-                    defaults: new { Controller = "Home" }
+                    defaults: new { Controller = "Album" }
                 );
             });
         }

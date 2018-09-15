@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -21,18 +23,18 @@
 </head>
 <body>
     <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary justify-content-between">
-        <a class="navbar-brand" asp-controller="Home" asp-action="Index">Image Host</a>
+        <a class="navbar-brand" asp-controller="Album" asp-action="Index">Image Host</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-item nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                <a class="nav-item nav-link" asp-controller="Home" asp-action="About">About</a>
-                <a class="nav-item nav-link" asp-controller="Home" asp-action="Contact">Contact</a>
-                <a class="nav-item nav-link" asp-controller="Settings" asp-action="Index">Settings</a>
-                <a class="nav-item nav-link" asp-controller="Album" asp-action="Index">Album</a>
-            </div>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="navbar-nav">
+                    <a class="nav-item nav-link" asp-controller="Album" asp-action="Index">Albums</a>
+                    <a class="nav-item nav-link" asp-controller="Settings" asp-action="Index">Settings</a>
+                </div>
+            }
             <partial name="_LoginPartial" />
         </div>
     </nav>
