@@ -55,7 +55,7 @@ namespace ImageHost.Controllers {
         }
 
         [HttpGet]
-        public async Task<IActionResult> Direct(string id)
+        public async Task<IActionResult> Direct(string id, bool? thumbnail)
         {
             var user = await _userManager.GetUserAsync(User);
             var image = await _context.Images
@@ -76,11 +76,16 @@ namespace ImageHost.Controllers {
                 }
             }
             var expireTime = TimeSpan.Parse(await _settingsHelper.Get(Settings.ImageCacheTime));
+            var s3ImagePath = image.Id;
+            if (thumbnail == true && image.HasThumbnail)
+            {
+                s3ImagePath = $"thumbnail/{image.Id}";
+            }
             var link = (await _awsHelper.GetS3Client()).GetPreSignedURL(new GetPreSignedUrlRequest
             {
                 BucketName = await _settingsHelper.Get(Settings.S3BucketName),
                 Expires = DateTime.Now.AddMinutes(expireTime.TotalMinutes),
-                Key = image.Id
+                Key = s3ImagePath
             });
 
             var cacheability = image.Album.IsPrivate ? "private" : "public";

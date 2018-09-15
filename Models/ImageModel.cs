@@ -23,5 +23,7 @@ namespace ImageHost.Models
         public ApplicationUser OwnBy { get; set; }
         
         public Album Album { get; set; }
+        
+        public bool HasThumbnail { get; set; }
     }
 }

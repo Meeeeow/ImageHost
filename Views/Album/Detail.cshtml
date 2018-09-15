@@ -21,7 +21,7 @@
         {
             <a class="col-lg-3 mb-3" asp-action="Detail" asp-controller="Image" asp-route-id="@image.Id">
                 <div class="card">
-                    <img class="card-img-top" src="@Url.Action("Direct", "Image", new { id = image.Id })">
+                    <img class="card-img-top" src="@Url.Action("Direct", "Image", new { id = image.Id, thumbnail = true })">
                     <div class="card-body">
                         <h5 class="card-title">@image.Name</h5>
                         <p class="card-text mt-4">

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -101,6 +103,15 @@ namespace ImageHost.Controllers
             }
 
             var file = files[0];
+            var tempImage = System.Drawing.Image.FromStream(file.OpenReadStream());
+
+            var hasThumbnail = tempImage.Width > 255;
+            System.Drawing.Image tempThumbImage = null;
+            if (hasThumbnail)
+            {
+                tempThumbImage = ImageToThumbnail(tempImage);
+            }
+            
             var hash = (new SHA1CryptoServiceProvider()).ComputeHash(file.OpenReadStream());
             var imageModel = new Image
             {
@@ -109,7 +120,8 @@ namespace ImageHost.Controllers
                 Sha1 = BitConverter.ToString(hash).Replace("-",""),
                 FileSize = file.Length,
                 OwnBy = await _userManager.GetUserAsync(User),
-                Album = _context.Albums.Find(albumId)
+                Album = _context.Albums.Find(albumId),
+                HasThumbnail = hasThumbnail
             };
 
             var dup = _context.Images.Where(image => image.Sha1 == imageModel.Sha1).ToList();
@@ -133,6 +145,15 @@ namespace ImageHost.Controllers
                 Key = imageModel.Id,
                 InputStream = file.OpenReadStream()
             });
+            if (hasThumbnail)
+            {
+                await s3.PutObjectAsync(new PutObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = $"thumbnail/{imageModel.Id}",
+                    InputStream = ImageToStream(tempThumbImage)
+                });
+            }
             _context.Images.Add(imageModel);
             await _context.SaveChangesAsync();
 
@@ -145,6 +166,27 @@ namespace ImageHost.Controllers
         {
             if (!album.IsPrivate) return true;
             return User.Identity.IsAuthenticated && album.OwnBy == user;
+        }
+
+        private System.Drawing.Image ImageToThumbnail(System.Drawing.Image originImage)
+        {
+            var newHeight = originImage.Height;
+            var newWidth = originImage.Width;
+            if (originImage.Width > 255) {
+                newWidth = 255;
+                var factor = (float)newWidth / originImage.Width;
+                newHeight = Convert.ToInt32(originImage.Height * factor);
+            }
+            
+            return originImage.GetThumbnailImage(newWidth, newHeight, () => false, IntPtr.Zero);
+        }
+
+        private Stream ImageToStream(System.Drawing.Image image)
+        {
+            var stream = new MemoryStream();
+            image.Save(stream, ImageFormat.Jpeg);
+            stream.Position = 0;
+            return stream;
         }
         
         #endregion
