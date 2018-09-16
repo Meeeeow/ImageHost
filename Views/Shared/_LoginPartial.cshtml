@@ -1,6 +1,9 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var returnUrl = Context.Request.Query["ReturnUrl"];
+}
 @if (SignInManager.IsSignedIn(User))
 {
     <form asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })" method="post" id="logoutForm" class="ml-auto">
@@ -14,6 +17,6 @@ else
 {
     <div class="navbar-nav ml-auto">
         <a class="nav-item nav-link" asp-controller="Account" asp-action="Register">Register</a>
-        <a class="nav-item nav-link" asp-controller="Account" asp-action="Login">Login</a>
+        <a class="nav-item nav-link" asp-controller="Account" asp-action="Login" asp-route-ReturnUrl="@returnUrl">Login</a>
     </div>
 }
