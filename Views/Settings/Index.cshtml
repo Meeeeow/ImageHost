@@ -9,6 +9,14 @@
 <div class="row">
     <div class="col-md-6">
         <form method="post" asp-action="Index">
+            <label>Register</label>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="DisableUserRegistration" checked="@Model.DisableUserRegistration">
+                <label class="custom-control-label" asp-for="DisableUserRegistration"></label>
+            </div>
+
+            <br/>
+
             <div class="form-group">
                 <label asp-for="ImageCacheMinutes"></label>
                 <div class="input-group">
@@ -19,7 +27,7 @@
                 </div>
                 <span asp-validation-for="ImageCacheMinutes" class="text-danger"></span>
             </div>
-            
+
             <button class="btn btn-primary" type="submit">Save</button>
         </form>
     </div>

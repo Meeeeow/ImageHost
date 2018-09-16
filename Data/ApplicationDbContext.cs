@@ -29,6 +29,10 @@ namespace ImageHost.Data
                 {
                     Key = Data.Settings.ImageCacheTime,
                     Val = TimeSpan.FromDays(7).ToString()
+                }, new Setting
+                {
+                    Key = Data.Settings.DisableUserRegistration,
+                    Val = false.ToString()
                 });
             
             base.OnModelCreating(builder);

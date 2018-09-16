@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,7 @@ namespace ImageHost.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
+        private readonly bool _registrationDisabled;
 
         [TempData] public string StatusMessage { get; set; }
 
@@ -26,12 +28,17 @@ namespace ImageHost.Controllers
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            ISettingsHelper settingsHelper
+        )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
+            _registrationDisabled = bool.Parse(
+                settingsHelper.Get(Data.Settings.DisableUserRegistration).GetAwaiter().GetResult()
+            );
         }
 
         [TempData] public string ErrorMessage { get; set; }
@@ -105,8 +112,10 @@ namespace ImageHost.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult AccessDenied()
         {
+            HttpContext.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return View();
         }
 
@@ -115,6 +124,8 @@ namespace ImageHost.Controllers
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
         {
+            if (_registrationDisabled) return RedirectToAction(nameof(AccessDenied));
+            
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -124,6 +135,8 @@ namespace ImageHost.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
         {
+            if (_registrationDisabled) return RedirectToAction(nameof(AccessDenied));
+            
             ViewData["ReturnUrl"] = returnUrl;
             if (ModelState.IsValid)
             {

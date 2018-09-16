@@ -13,6 +13,9 @@ namespace ImageHost.Models.SettingsViewModels
             get => TimeSpan.FromMinutes(ImageCacheMinutes);
             set => ImageCacheMinutes = (int)value.TotalMinutes;
         }
+        
+        [Display(Name = "Disable user registration")]
+        public bool DisableUserRegistration { get; set; }
 
         public string StatusMessage { get; set; }
     }

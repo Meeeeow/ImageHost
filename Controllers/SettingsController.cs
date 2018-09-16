@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Amazon;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +35,7 @@ namespace ImageHost.Controllers
             return View(new BasicSettingViewModel
             {
                 ImageCacheTime = TimeSpan.Parse(await _settingsHelper.Get(Settings.ImageCacheTime)),
+                DisableUserRegistration = bool.Parse(await _settingsHelper.Get(Settings.DisableUserRegistration)),
                 StatusMessage = StatusMessage
             });
         }
@@ -42,10 +44,22 @@ namespace ImageHost.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(BasicSettingViewModel model)
         {
+            var imageCacheTime = TimeSpan.Parse(await _settingsHelper.Get(Settings.ImageCacheTime)).TotalMinutes;
+            var disableRegistration = bool.Parse(await _settingsHelper.Get(Settings.DisableUserRegistration));
+            
             if (ModelState.IsValid)
             {
-                StatusMessage = $"Image cache time was changed to {model.ImageCacheTime.TotalMinutes} minutes";
-                await _settingsHelper.Write(Settings.ImageCacheTime, model.ImageCacheTime.ToString());
+                if ((int)imageCacheTime != model.ImageCacheMinutes)
+                {
+                    await _settingsHelper.Write(Settings.ImageCacheTime, model.ImageCacheTime.ToString());
+                    StatusMessage += $"Image cache time was changed to {model.ImageCacheTime.TotalMinutes} minutes";
+                }
+
+                if (disableRegistration != model.DisableUserRegistration)
+                {
+                    await _settingsHelper.Write(Settings.DisableUserRegistration, model.DisableUserRegistration.ToString());
+                    StatusMessage += $"Disable registration was set to {model.DisableUserRegistration.ToString()}";
+                }
             }
             
             return RedirectToAction(nameof(Index));

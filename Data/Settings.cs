@@ -5,5 +5,6 @@ namespace ImageHost.Data
         public const string AwsActiveProfile = "AwsActiveProfile";
         public const string S3BucketName = "S3BucketName";
         public const string ImageCacheTime = "ImageCacheTime";
+        public const string DisableUserRegistration = "DisableUserRegistration";
     }
 }
