@@ -4,12 +4,15 @@
     var albumTitle = $"Album \"{album.Name}\"";
     ViewData["Title"] = albumTitle;
 }
-
+@inject SignInManager<ApplicationUser> SignInManager
 <div class="d-flex justify-content-between">
     <h2 class="d-inline">@albumTitle</h2>
     <div class="align-content-end">
-        <button class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">Upload</button>
-        <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#settingModal">Setting</button>    
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <button class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">Upload</button>
+            <button class="btn btn-outline-secondary" data-toggle="modal" data-target="#settingModal">Setting</button>    
+        }
     </div>
 </div>
 <hr/>
