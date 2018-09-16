@@ -17,6 +17,8 @@ namespace ImageHost.Controllers {
         private readonly ISettingsHelper _settingsHelper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly string bucketName;
+        private readonly TimeSpan imageCacheTime;
 
         public ImageController(
             ApplicationDbContext context,
@@ -31,6 +33,8 @@ namespace ImageHost.Controllers {
             _settingsHelper = settingsHelper;
             _userManager = userManager;
             _signInManager = signInManager;
+            bucketName = _settingsHelper.Get(Settings.S3BucketName).GetAwaiter().GetResult();
+            imageCacheTime = TimeSpan.Parse(_settingsHelper.Get(Settings.ImageCacheTime).GetAwaiter().GetResult());
         }
         
         [HttpGet]
@@ -78,7 +82,6 @@ namespace ImageHost.Controllers {
                     return StatusCode(304);
                 }
             }
-            var expireTime = TimeSpan.Parse(await _settingsHelper.Get(Settings.ImageCacheTime));
             var s3ImagePath = image.Id;
             if (thumbnail == true && image.HasThumbnail)
             {
@@ -86,14 +89,14 @@ namespace ImageHost.Controllers {
             }
             var link = (await _awsHelper.GetS3Client()).GetPreSignedURL(new GetPreSignedUrlRequest
             {
-                BucketName = await _settingsHelper.Get(Settings.S3BucketName),
-                Expires = DateTime.Now.AddMinutes(expireTime.TotalMinutes),
+                BucketName = bucketName,
+                Expires = DateTime.Now.AddMinutes(imageCacheTime.TotalMinutes),
                 Key = s3ImagePath
             });
 
             var cacheability = image.Album.IsPrivate ? "private" : "public";
             HttpContext.Response.Headers.Add("Last-Modified", image.UploadTimeUtc.ToUniversalTime().ToString("R"));
-            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={expireTime.TotalSeconds}");
+            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={imageCacheTime.TotalSeconds}");
             return Redirect(link);
         }
 
@@ -119,7 +122,7 @@ namespace ImageHost.Controllers {
             var s3 = await _awsHelper.GetS3Client();
             await s3.DeleteObjectsAsync(new DeleteObjectsRequest
             {
-                BucketName = await _settingsHelper.Get(Settings.S3BucketName),
+                BucketName = bucketName,
                 Objects = objects
             });
 
@@ -128,6 +131,39 @@ namespace ImageHost.Controllers {
 
             return RedirectToAction(nameof(Detail), nameof(Album), new {id = image.Album.Id});
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Proxy(string id)
+        {
+            var image = await _context.Images
+                .Include(i => i.OwnBy)
+                .Include(i => i.Album)
+                .SingleAsync(i => i.Id == id);
+                
+            if (image == null) return NotFound();
+            if (!await HasPermissionToImage(image)) return Unauthorized();
+
+            var headerValue = Request.Headers["If-Modified-Since"];
+            if (!string.IsNullOrEmpty(headerValue))
+            {
+                var modifiedSince = DateTime.Parse(headerValue).ToLocalTime();
+                if (modifiedSince >= image.UploadTimeUtc)
+                {
+                    return StatusCode(304);
+                }
+            }
+            var response = await (await _awsHelper.GetS3Client()).GetObjectAsync(new GetObjectRequest
+            {
+                BucketName = bucketName,
+                Key = image.Id
+            });
+
+            var cacheability = image.Album.IsPrivate ? "private" : "public";
+            HttpContext.Response.Headers.Add("Last-Modified", image.UploadTimeUtc.ToString("R"));
+            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={imageCacheTime.TotalSeconds}");
+            return File(response.ResponseStream, image.MimeType);
+        }
+        
         
         #region Helper
 

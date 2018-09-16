@@ -145,7 +145,8 @@ namespace ImageHost.Controllers
             {
                 BucketName = bucketName,
                 Key = imageModel.Id,
-                InputStream = file.OpenReadStream()
+                InputStream = file.OpenReadStream(),
+                ContentType = imageModel.MimeType
             });
             if (hasThumbnail)
             {
@@ -153,7 +154,8 @@ namespace ImageHost.Controllers
                 {
                     BucketName = bucketName,
                     Key = $"thumbnail/{imageModel.Id}",
-                    InputStream = ImageToStream(tempThumbImage)
+                    InputStream = ImageToStream(tempThumbImage),
+                    ContentType = GetMimeTypeFromImageFormat(ImageFormat.Jpeg)
                 });
             }
             _context.Images.Add(imageModel);
@@ -190,6 +192,12 @@ namespace ImageHost.Controllers
             image.Save(stream, ImageFormat.Jpeg);
             stream.Position = 0;
             return stream;
+        }
+
+        private string GetMimeTypeFromImageFormat(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
+            return codecs.First(codec => codec.FormatID == format.Guid).MimeType;
         }
         
         #endregion

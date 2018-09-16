@@ -50,6 +50,9 @@
         <a class="nav-link active" data-toggle="tab" href="#direct" role="tab">Direct link</a>
     </li>
     <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#proxy" role="tab">Proxy link</a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#detail" role="tab">Detail link</a>
     </li>
 </ul>
@@ -59,6 +62,13 @@
         <input 
             class="form-control"
             value="@Url.Action("Direct", "Image", new { id = image.Id }, Context.Request.Scheme )"
+            onclick="this.select()"
+        />
+    </div>
+    <div class="tab-pane fade" id="proxy" role="tabpanel">
+        <input 
+            class="form-control"
+            value="@Url.Action("Proxy", "Image", new { id = image.Id }, Context.Request.Scheme )"
             onclick="this.select()"
         />
     </div>
