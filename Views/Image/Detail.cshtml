@@ -5,8 +5,8 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <div class="d-flex justify-content-between">
-    <h2 class="d-inline">@image.Name</h2>
-    <div class="align-content-end d-flex align-items-center">
+    <h2 class="d-inline text-truncate mr-5" title="@image.Name">@image.Name</h2>
+    <div class="align-content-end d-flex align-items-center flex-shrink-0">
         <form method="get">
             <button
                 class="btn btn-outline-dark mr-2"
