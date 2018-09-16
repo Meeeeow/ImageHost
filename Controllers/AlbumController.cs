@@ -71,7 +71,7 @@ namespace ImageHost.Controllers
             await _context.Albums.AddAsync(new Album
             {
                 Name = model.AlbumCreateViewModel.AlbumName,
-                IsPrivate = model.AlbumCreateViewModel.IsPrivate,
+                IsPrivate = model.AlbumCreateViewModel.Visibility != "public",
                 OwnBy = await _userManager.GetUserAsync(User)
             });
 

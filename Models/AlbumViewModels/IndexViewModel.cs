@@ -21,7 +21,6 @@ namespace ImageHost.Models.AlbumViewModels
         public string AlbumName { get; set; }
 
         [Required]
-        [Display(Name = "Is private")]
-        public bool IsPrivate { get; set; }
+        public string Visibility { get; set; }
     }
 }

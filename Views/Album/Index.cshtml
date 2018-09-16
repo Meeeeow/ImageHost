@@ -55,10 +55,28 @@
                         <input class="form-control" asp-for="AlbumCreateViewModel.AlbumName"/>
                         <span asp-validation-for="AlbumCreateViewModel.AlbumName" class="text-danger"></span>
                     </div>
-                    <div class="custom-control custom-checkbox">
-                        <input checked class="custom-control-input" asp-for="AlbumCreateViewModel.IsPrivate"/>
-                        <label class="custom-control-label" asp-for="AlbumCreateViewModel.IsPrivate"></label>
-                        <span asp-validation-for="AlbumCreateViewModel.IsPrivate" class="text-danger"></span>
+                    
+                    <label>Album visibility</label>
+                    <div class="custom-control custom-radio">
+                        <input
+                            type="radio"
+                            id="visibilityPrivate"
+                            asp-for="AlbumCreateViewModel.Visibility"
+                            class="custom-control-input"
+                            value="private"
+                            checked
+                        >
+                        <label class="custom-control-label" for="visibilityPrivate">Private</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input
+                            type="radio"
+                            id="visibilityPublic"
+                            asp-for="AlbumCreateViewModel.Visibility"
+                            class="custom-control-input"
+                            value="public"
+                        >
+                        <label class="custom-control-label" for="visibilityPublic">Public</label>
                     </div>
                 </div>
                 <div class="modal-footer">

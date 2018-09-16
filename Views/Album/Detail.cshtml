@@ -92,15 +92,30 @@
                     <input hidden name="albumId" value="@album.Id" />
                     <label>Album visibility</label>
                     <br/>
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                        <label class="btn btn-secondary @(album.IsPrivate ? "active" : "")">
-                            <input type="radio" value="private" name="visibility" checked="@album.IsPrivate"> Private
-                        </label>
-                        <label class="btn btn-secondary @(!album.IsPrivate ? "active" : "")">
-                            <input type="radio" value="public" name="visibility" checked="@(!album.IsPrivate)"> Public
-                        </label>
+                    <div class="custom-control custom-radio">
+                        <input
+                            type="radio"
+                            id="visibilityPrivate"
+                            name="visibility"
+                            class="custom-control-input"
+                            value="private"
+                            checked="@album.IsPrivate"
+                        >
+                        <label class="custom-control-label" for="visibilityPrivate">Private</label>
                     </div>
-                    <br/><br/>
+                    <div class="custom-control custom-radio">
+                        <input
+                            type="radio"
+                            id="visibilityPublic"
+                            name="visibility"
+                            class="custom-control-input"
+                            value="public"
+                            checked="@(!album.IsPrivate)"
+                        >
+                        <label class="custom-control-label" for="visibilityPublic">Public</label>
+                    </div>
+
+                    <br/>
                     <label>Delete album</label>
                     <br/>
                     <button asp-action="Delete" asp-route-albumId="@album.Id" class="btn btn-danger">Delete</button>
