@@ -201,28 +201,31 @@ namespace ImageHost.Controllers
             if (!await HasPermissionTo(album)) return Forbid();
 
             var imagesToDelete = new List<KeyVersion>();
-            foreach (var image in album.Images)
+            if (album.Images.Count > 0)
             {
-                imagesToDelete.Add(new KeyVersion
-                {
-                    Key = image.Id
-                });
-                if (image.HasThumbnail)
+                foreach (var image in album.Images)
                 {
                     imagesToDelete.Add(new KeyVersion
                     {
-                        Key = $"thumbnail/{image.Id}"
+                        Key = image.Id
                     });
+                    if (image.HasThumbnail)
+                    {
+                        imagesToDelete.Add(new KeyVersion
+                        {
+                            Key = $"thumbnail/{image.Id}"
+                        });
+                    }
+
+                    _context.Images.Remove(image);
                 }
 
-                _context.Images.Remove(image);
+                await (await _awsHelper.GetS3Client()).DeleteObjectsAsync(new DeleteObjectsRequest
+                {
+                    BucketName = _bucketName,
+                    Objects = imagesToDelete
+                });
             }
-
-            await (await _awsHelper.GetS3Client()).DeleteObjectsAsync(new DeleteObjectsRequest
-            {
-                BucketName = _bucketName,
-                Objects = imagesToDelete
-            });
             _context.Albums.Remove(album);
             await _context.SaveChangesAsync();
 
