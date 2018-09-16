@@ -97,6 +97,10 @@
                             <input type="radio" value="public" name="visibility" checked="@(!album.IsPrivate)"> Public
                         </label>
                     </div>
+                    <br/><br/>
+                    <label>Delete album</label>
+                    <br/>
+                    <button asp-action="Delete" asp-route-albumId="@album.Id" class="btn btn-danger">Delete</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

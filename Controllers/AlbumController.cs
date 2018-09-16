@@ -26,6 +26,7 @@ namespace ImageHost.Controllers
         private readonly ISettingsHelper _settingsHelper;
         private readonly IAwsHelper _awsHelper;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly string _bucketName;
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -43,6 +44,7 @@ namespace ImageHost.Controllers
             _awsHelper = awsHelper;
             _settingsHelper = settingsHelper;
             _signInManager = signInManager;
+            _bucketName = _settingsHelper.Get(Settings.S3BucketName).GetAwaiter().GetResult();
         }
         
         [HttpGet]
@@ -142,15 +144,14 @@ namespace ImageHost.Controllers
                 return RedirectToAction(nameof(Detail), new {id = albumId});
             }
             
-            var bucketName = await _settingsHelper.Get(Settings.S3BucketName);
-            if (string.IsNullOrEmpty(bucketName))
+            if (string.IsNullOrEmpty(_bucketName))
             {
                 throw new Exception("No S3 bucket name was set.");
             }
             var s3 = await _awsHelper.GetS3Client();
             await s3.PutObjectAsync(new PutObjectRequest
             {
-                BucketName = bucketName,
+                BucketName = _bucketName,
                 Key = imageModel.Id,
                 InputStream = file.OpenReadStream(),
                 ContentType = imageModel.MimeType
@@ -159,7 +160,7 @@ namespace ImageHost.Controllers
             {
                 await s3.PutObjectAsync(new PutObjectRequest
                 {
-                    BucketName = bucketName,
+                    BucketName = _bucketName,
                     Key = $"thumbnail/{imageModel.Id}",
                     InputStream = ImageToStream(tempThumbImage),
                     ContentType = GetMimeTypeFromImageFormat(ImageFormat.Jpeg)
@@ -187,6 +188,45 @@ namespace ImageHost.Controllers
 
             StatusMessage = $"Album '{album.Name}' was successful set to {(album.IsPrivate ? "Private" : "Public")}";
             return RedirectToAction(nameof(Detail), new {id = albumId});
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(string albumId)
+        {
+            var album = await _context.Albums
+                .Include(a => a.Images)
+                .SingleAsync(a => a.Id == albumId);
+
+            if (album == null) return NotFound();
+            if (!await HasPermissionTo(album)) return Unauthorized();
+
+            var imagesToDelete = new List<KeyVersion>();
+            foreach (var image in album.Images)
+            {
+                imagesToDelete.Add(new KeyVersion
+                {
+                    Key = image.Id
+                });
+                if (image.HasThumbnail)
+                {
+                    imagesToDelete.Add(new KeyVersion
+                    {
+                        Key = $"thumbnail/{image.Id}"
+                    });
+                }
+
+                _context.Images.Remove(image);
+            }
+
+            await (await _awsHelper.GetS3Client()).DeleteObjectsAsync(new DeleteObjectsRequest
+            {
+                BucketName = _bucketName,
+                Objects = imagesToDelete
+            });
+            _context.Albums.Remove(album);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
         
         #region Helper
