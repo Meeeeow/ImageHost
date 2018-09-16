@@ -105,7 +105,7 @@ namespace ImageHost.Controllers
                 .Include(a => a.Images)
                 .SingleAsync(a => a.Id == albumId);
 
-            if (album == null) return NotFound();
+            if (album == null) return BadRequest();
             if (!await HasPermissionTo(album)) return Forbid();
             
             if (files.Count > 1)
