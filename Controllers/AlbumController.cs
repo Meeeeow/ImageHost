@@ -88,7 +88,7 @@ namespace ImageHost.Controllers
                 .SingleAsync(a => a.Id == id);
 
             if (album == null) return NotFound();
-            if (!await HasPermissionTo(album)) return Unauthorized();
+            if (!await HasPermissionTo(album)) return Forbid();
             
             return View(new DetailViewModel
             {
@@ -106,7 +106,7 @@ namespace ImageHost.Controllers
                 .SingleAsync(a => a.Id == albumId);
 
             if (album == null) return NotFound();
-            if (!await HasPermissionTo(album)) return Unauthorized();
+            if (!await HasPermissionTo(album)) return Forbid();
             
             if (files.Count > 1)
             {
@@ -180,7 +180,7 @@ namespace ImageHost.Controllers
                 .SingleAsync(a => a.Id == albumId);
 
             if (album == null) return NotFound();
-            if (!await HasPermissionTo(album)) return Unauthorized();
+            if (!await HasPermissionTo(album)) return Forbid();
 
             album.IsPrivate = visibility == "private";
             _context.Albums.Update(album);
@@ -198,7 +198,7 @@ namespace ImageHost.Controllers
                 .SingleAsync(a => a.Id == albumId);
 
             if (album == null) return NotFound();
-            if (!await HasPermissionTo(album)) return Unauthorized();
+            if (!await HasPermissionTo(album)) return Forbid();
 
             var imagesToDelete = new List<KeyVersion>();
             foreach (var image in album.Images)

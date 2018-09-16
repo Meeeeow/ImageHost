@@ -61,7 +61,7 @@ namespace ImageHost
                 options.User.RequireUniqueEmail = false;
             });
 
-             services.ConfigureApplicationCookie(options =>
+            services.ConfigureApplicationCookie(options =>
             {
                 // Cookie settings
                 options.Cookie.HttpOnly = true;

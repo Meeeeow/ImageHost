@@ -46,7 +46,7 @@ namespace ImageHost.Controllers {
                 .Include(i => i.Album)
                 .SingleAsync(i => i.Id == id);
 
-            if (!await HasPermissionToImage(image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Forbid();
             
             if (image == null)
             {
@@ -71,7 +71,7 @@ namespace ImageHost.Controllers {
                 .SingleAsync(i => i.Id == id);
                 
             if (image == null) return NotFound();
-            if (!await HasPermissionToImage(image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Forbid();
 
             var headerValue = Request.Headers["If-Modified-Since"];
             if (!string.IsNullOrEmpty(headerValue))
@@ -103,7 +103,7 @@ namespace ImageHost.Controllers {
         [HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
-            if (!_signInManager.IsSignedIn(User)) return Unauthorized();
+            if (!_signInManager.IsSignedIn(User)) return Forbid();
             
             var image = await _context.Images
                 .Include(i => i.OwnBy)
@@ -111,7 +111,7 @@ namespace ImageHost.Controllers {
                 .SingleAsync(i => i.Id == id);
                 
             if (image == null) return NotFound();
-            if (!await HasPermissionToImage(image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Forbid();
 
             var objects = new List<KeyVersion>
             {
@@ -141,7 +141,7 @@ namespace ImageHost.Controllers {
                 .SingleAsync(i => i.Id == id);
                 
             if (image == null) return NotFound();
-            if (!await HasPermissionToImage(image)) return Unauthorized();
+            if (!await HasPermissionToImage(image)) return Forbid();
 
             var headerValue = Request.Headers["If-Modified-Since"];
             if (!string.IsNullOrEmpty(headerValue))
