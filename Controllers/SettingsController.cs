@@ -123,8 +123,8 @@ namespace ImageHost.Controllers
             };
             var profile = new CredentialProfile(model.AddProfileViewModel.ProfileName, options);
             profile.Region = RegionEndpoint.GetBySystemName(model.AddProfileViewModel.Region);
-            var netSdkFile = new NetSDKCredentialsFile();
-            netSdkFile.RegisterProfile(profile);
+            var sharedCredentialsFile = new SharedCredentialsFile();
+            sharedCredentialsFile.RegisterProfile(profile);
 
             StatusMessage = $"Successful added profile '{model.AddProfileViewModel.ProfileName}'";
             return RedirectToAction(nameof(AwsSettings));
