@@ -17,8 +17,8 @@ namespace ImageHost.Controllers {
         private readonly ISettingsHelper _settingsHelper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly string bucketName;
-        private readonly TimeSpan imageCacheTime;
+        private readonly string _bucketName;
+        private readonly TimeSpan _imageCacheTime;
 
         public ImageController(
             ApplicationDbContext context,
@@ -33,8 +33,8 @@ namespace ImageHost.Controllers {
             _settingsHelper = settingsHelper;
             _userManager = userManager;
             _signInManager = signInManager;
-            bucketName = _settingsHelper.Get(Settings.S3BucketName).GetAwaiter().GetResult();
-            imageCacheTime = TimeSpan.Parse(_settingsHelper.Get(Settings.ImageCacheTime).GetAwaiter().GetResult());
+            _bucketName = _settingsHelper.Get(Settings.S3BucketName).GetAwaiter().GetResult();
+            _imageCacheTime = TimeSpan.Parse(_settingsHelper.Get(Settings.ImageCacheTime).GetAwaiter().GetResult());
         }
         
         [HttpGet]
@@ -89,14 +89,14 @@ namespace ImageHost.Controllers {
             }
             var link = (await _awsHelper.GetS3Client()).GetPreSignedURL(new GetPreSignedUrlRequest
             {
-                BucketName = bucketName,
-                Expires = DateTime.Now.AddMinutes(imageCacheTime.TotalMinutes),
+                BucketName = _bucketName,
+                Expires = DateTime.Now.AddMinutes(_imageCacheTime.TotalMinutes),
                 Key = s3ImagePath
             });
 
             var cacheability = image.Album.IsPrivate ? "private" : "public";
             HttpContext.Response.Headers.Add("Last-Modified", image.UploadTimeUtc.ToUniversalTime().ToString("R"));
-            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={imageCacheTime.TotalSeconds}");
+            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={_imageCacheTime.TotalSeconds}");
             return Redirect(link);
         }
 
@@ -122,7 +122,7 @@ namespace ImageHost.Controllers {
             var s3 = await _awsHelper.GetS3Client();
             await s3.DeleteObjectsAsync(new DeleteObjectsRequest
             {
-                BucketName = bucketName,
+                BucketName = _bucketName,
                 Objects = objects
             });
 
@@ -154,13 +154,13 @@ namespace ImageHost.Controllers {
             }
             var response = await (await _awsHelper.GetS3Client()).GetObjectAsync(new GetObjectRequest
             {
-                BucketName = bucketName,
+                BucketName = _bucketName,
                 Key = image.Id
             });
 
             var cacheability = image.Album.IsPrivate ? "private" : "public";
             HttpContext.Response.Headers.Add("Last-Modified", image.UploadTimeUtc.ToString("R"));
-            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={imageCacheTime.TotalSeconds}");
+            HttpContext.Response.Headers.Add("Cache-Control", $"{cacheability}, max-age={_imageCacheTime.TotalSeconds}");
             return File(response.ResponseStream, image.MimeType);
         }
         
