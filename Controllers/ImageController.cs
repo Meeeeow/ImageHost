@@ -127,7 +127,7 @@ namespace ImageHost.Controllers {
             });
 
             _context.Images.Remove(image);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Detail), nameof(Album), new {id = image.Album.Id});
         }

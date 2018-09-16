@@ -73,7 +73,7 @@ namespace ImageHost.Controllers
                 OwnBy = await _userManager.GetUserAsync(User)
             });
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
@@ -84,8 +84,8 @@ namespace ImageHost.Controllers
             var album = await _context.Albums
                 .Include(a => a.Images)
                 .SingleAsync(a => a.Id == id);
-            
-            
+
+            if (album == null) return NotFound();
             if (!await HasPermissionTo(album)) return Unauthorized();
             
             return View(new DetailViewModel
@@ -99,6 +99,13 @@ namespace ImageHost.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadImage(List<IFormFile> files, string albumId)
         {
+            var album = await _context.Albums
+                .Include(a => a.Images)
+                .SingleAsync(a => a.Id == albumId);
+
+            if (album == null) return NotFound();
+            if (!await HasPermissionTo(album)) return Unauthorized();
+            
             if (files.Count > 1)
             {
                 throw new Exception("Only single file upload was supported.");
@@ -122,7 +129,7 @@ namespace ImageHost.Controllers
                 Sha1 = BitConverter.ToString(hash).Replace("-",""),
                 FileSize = file.Length,
                 OwnBy = await _userManager.GetUserAsync(User),
-                Album = _context.Albums.Find(albumId),
+                Album = album,
                 HasThumbnail = hasThumbnail
             };
 
@@ -162,6 +169,24 @@ namespace ImageHost.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Detail), new { id = albumId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SetVisibility(string visibility, string albumId)
+        {
+            var album = await _context.Albums
+                .Include(a => a.Images)
+                .SingleAsync(a => a.Id == albumId);
+
+            if (album == null) return NotFound();
+            if (!await HasPermissionTo(album)) return Unauthorized();
+
+            album.IsPrivate = visibility == "private";
+            _context.Albums.Update(album);
+            await _context.SaveChangesAsync();
+
+            StatusMessage = $"Album '{album.Name}' was successful set to {(album.IsPrivate ? "Private" : "Public")}";
+            return RedirectToAction(nameof(Detail), new {id = albumId});
         }
         
         #region Helper
