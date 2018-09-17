@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using ImageHost.Data;
 using ImageHost.Models;
 using ImageHost.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ImageHost
 {
@@ -72,6 +73,13 @@ namespace ImageHost
                 options.SlidingExpiration = true;
             });
 
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+            
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<ISettingsHelper, SettingsHelper>();
             services.AddTransient<IAwsHelper, AwsHelper>();
@@ -93,6 +101,8 @@ namespace ImageHost
                 // app.UseHsts();
             }
 
+            app.UseForwardedHeaders();
+            
             // app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
