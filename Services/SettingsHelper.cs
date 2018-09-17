@@ -16,7 +16,7 @@ namespace ImageHost.Services
 
         public async Task<bool> Write(string key, string val)
         {
-            var setting = await _context.Settings.FirstAsync(s => s.Key == key);
+            var setting = await _context.Settings.FindAsync(key);
             if (setting != null)
             {
                 setting.Val = val;
