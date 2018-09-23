@@ -4,5 +4,6 @@ namespace ImageHost.Models.AlbumViewModels
     {
         public Album Album { get; set; }
         public string StatusMessage { get; set; }
+        public UploadViewModel UploadViewModel { get; set; }
     }
 }

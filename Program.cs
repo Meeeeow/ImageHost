@@ -19,6 +19,17 @@ namespace ImageHost
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging((context, logging) => {
+                    var env = context.HostingEnvironment;
+                    var config = context.Configuration.GetSection("Logging");
+                    logging.AddConfiguration(config);
+                    logging.AddConsole();
+                    
+                    // Filter out EFCore query log and statis file serve log
+                    logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning);
+                    logging.AddFilter("Microsoft.AspNetCore.Hosting.Internal.WebHost:Information", LogLevel.Warning);
+                    logging.AddFilter("Microsoft.AspNetCore.StaticFiles.StaticFileMiddleware", LogLevel.Warning);
+                })
                 .UseStartup<Startup>();
     }
 }

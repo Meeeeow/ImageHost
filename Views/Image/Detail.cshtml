@@ -5,7 +5,15 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <div class="d-flex justify-content-between">
-    <h2 class="d-inline text-truncate mr-5" title="@image.Name">@image.Name</h2>
+    <h2 class="d-inline-flex text-truncate mr-3" title="@image.Name">
+        <span class="text-truncate mr-2">
+            @image.Name
+        </span>
+        @if (image.Compressed)
+        {
+            <span class="badge badge-success">Compressed</span>
+        }
+    </h2>
     <div class="align-content-end d-flex align-items-center flex-shrink-0">
         <form method="get">
             <button

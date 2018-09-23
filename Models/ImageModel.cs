@@ -25,5 +25,6 @@ namespace ImageHost.Models
         public Album Album { get; set; }
         
         public bool HasThumbnail { get; set; }
+        public bool Compressed { get; set; }
     }
 }

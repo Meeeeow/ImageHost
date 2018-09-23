@@ -65,6 +65,70 @@ namespace ImageHost.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        #region Tinify
+        
+        [HttpGet]
+        public async Task<IActionResult> TinifySettings()
+        {
+            var model = new TinifySettingsViewModel
+            {
+                Enable = bool.Parse(await _settingsHelper.Get(Settings.EnableTinifyCompress)),
+                StatusMessage = StatusMessage
+            };
+
+            if (!model.Enable) return View(model);
+            
+            var tinifyKey = await (_settingsHelper.Get(Settings.TinifyApiKey));
+            TinifyAPI.Tinify.Key = tinifyKey;
+            try
+            {
+                await TinifyAPI.Tinify.Validate();
+                model.ApiKeyValid = true;
+            }
+            catch
+            {
+                model.ApiKeyValid = false;
+            }
+
+            model.CompressedCount = TinifyAPI.Tinify.CompressionCount;
+            model.ApiKey = await _settingsHelper.Get(Settings.TinifyApiKey);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TinifySettings(TinifySettingsViewModel model)
+        {
+            if (model.Enable && string.IsNullOrEmpty(model.ApiKey))
+            {
+                StatusMessage = "API Key can't be empty";
+                return RedirectToAction(nameof(TinifySettings));
+            }
+
+            await _settingsHelper.Write(Settings.EnableTinifyCompress, model.Enable.ToString());
+            if (model.Enable)
+            {
+                await _settingsHelper.Write(Settings.TinifyApiKey, model.ApiKey);
+            }
+            else
+            {
+                try
+                {
+                    _settingsHelper.Delete(Settings.TinifyApiKey);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+            StatusMessage = "Changes saved";
+            
+            return RedirectToAction(nameof(TinifySettings));
+        }
+        
+        #endregion
+        
         #region AWS
 
         [HttpGet]

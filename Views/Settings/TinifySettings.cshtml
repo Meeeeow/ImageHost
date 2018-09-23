@@ -1,0 +1,62 @@
+@model TinifySettingsViewModel
+
+@{
+    ViewData["Title"] = "Tinify settings";
+    ViewData.AddActivePage(SettingsNavPages.TinifySettings);
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage"/>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" asp-action="TinifySettings">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" asp-for="Enable" checked="@Model.Enable">
+                <label class="custom-control-label" asp-for="Enable"></label>
+            </div>
+
+            <div class="mt-3" id="enabledArea" style="display: none">
+                <label for="keyValid">API Key Valid: </label>
+                <strong
+                    id="keyValid"
+                    class="@(Model.ApiKeyValid ? "text-success" : "text-danger")"
+                >
+                    @(Model.ApiKeyValid ? "Yes" : "No")
+                </strong>
+                <br/>
+                <label>Compressed count in this month: </label>
+                <strong>@Model.CompressedCount</strong>
+                <br/>
+                
+                <div class="form-group mt-3">
+                    <label asp-for="ApiKey"></label>
+                    <input class="form-control" asp-for="ApiKey">
+                    <span asp-validation-for="ApiKey" class="text-danger"></span>
+                </div>
+            </div>
+            <button class="mt-1 btn btn-primary" type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
+
+<script>
+    var enabledArea = document.getElementById('enabledArea');
+    var enableCheckbox = document.querySelector('.custom-control-input');
+    if ('@Model.Enable' === 'True') {
+        enabledArea.removeAttribute('style');
+    }
+
+    enableCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            enabledArea.removeAttribute('style');
+            enabledArea.querySelector('input').setAttribute('required', 'true');
+        } else {
+            enabledArea.setAttribute('style', 'display: none');
+            enabledArea.querySelector('input').removeAttribute('required');
+        }
+    });
+</script>

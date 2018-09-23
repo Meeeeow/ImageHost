@@ -20,7 +20,7 @@ namespace ImageHost.Services
         {
             // TODO: Remove or implement proxy setting after development
             #if DEBUG
-                Amazon.AWSConfigs.ProxyConfig.Host = "socks5://127.0.0.1";
+                Amazon.AWSConfigs.ProxyConfig.Host = "http://127.0.0.1";
                 Amazon.AWSConfigs.ProxyConfig.Port = 1082;
             #endif
             

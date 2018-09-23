@@ -11,10 +11,10 @@ using ImageHost.Models;
 using ImageHost.Models.AlbumViewModels;
 using ImageHost.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ImageHost.Controllers
 {
@@ -26,6 +26,7 @@ namespace ImageHost.Controllers
         private readonly ISettingsHelper _settingsHelper;
         private readonly IAwsHelper _awsHelper;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger _logger;
         private readonly string _bucketName;
 
         [TempData]
@@ -36,7 +37,8 @@ namespace ImageHost.Controllers
             UserManager<ApplicationUser> userManager,
             ISettingsHelper settingsHelper,
             IAwsHelper awsHelper,
-            SignInManager<ApplicationUser> signInManager
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AlbumController> logger
         )
         {
             _context = context;
@@ -44,6 +46,7 @@ namespace ImageHost.Controllers
             _awsHelper = awsHelper;
             _settingsHelper = settingsHelper;
             _signInManager = signInManager;
+            _logger = logger;
             _bucketName = _settingsHelper.Get(Settings.S3BucketName).GetAwaiter().GetResult();
         }
         
@@ -93,13 +96,17 @@ namespace ImageHost.Controllers
             return View(new DetailViewModel
             {
                 Album = album,
-                StatusMessage = StatusMessage
+                StatusMessage = StatusMessage,
+                UploadViewModel = new UploadViewModel
+                {
+                    TinifyEnabled = bool.Parse(await _settingsHelper.Get(Settings.EnableTinifyCompress))
+                }
             });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadImage(List<IFormFile> files, string albumId)
+        public async Task<IActionResult> UploadImage(UploadViewModel model, string albumId)
         {
             var album = await _context.Albums
                 .Include(a => a.Images)
@@ -107,34 +114,66 @@ namespace ImageHost.Controllers
 
             if (album == null) return BadRequest();
             if (!await HasPermissionTo(album)) return Forbid();
-            
-            if (files.Count > 1)
+
+            #region Compress and copy
+
+            var compressedByTinify = false;
+            var file = model.File;
+            var appTinifyEnabled = bool.Parse(await _settingsHelper.Get(Settings.EnableTinifyCompress));
+            var canCompressByTinify = new string[] { "image/jpeg", "image/png" }.Any(s => s.Contains(file.ContentType));
+            MemoryStream imageStream;
+            if (model.Compress && appTinifyEnabled && canCompressByTinify)
             {
-                throw new Exception("Only single file upload was supported.");
+                using (var ms = new MemoryStream())
+                {
+                    await file.CopyToAsync(ms);
+                    var byteFile = ms.ToArray();
+                    TinifyAPI.Tinify.Key = await _settingsHelper.Get(Settings.TinifyApiKey);
+                    _logger.LogDebug("Starting upload to Tinify...");
+                    var tinifyWatch = System.Diagnostics.Stopwatch.StartNew();
+                    byteFile = await TinifyAPI.SourceTaskExtensions.ToBuffer(TinifyAPI.Tinify.FromBuffer(byteFile));
+                    tinifyWatch.Stop();
+                    _logger.LogDebug($"Upload to Tinify used: {tinifyWatch.ElapsedMilliseconds}ms");
+                    imageStream = new MemoryStream(byteFile);
+                    compressedByTinify = true;
+                }
             }
+            else
+            {
+                _logger.LogWarning("Image will not compress by Tinify");
+                imageStream = new MemoryStream();
+                await file.CopyToAsync(imageStream);
+            }
+            #endregion
 
-            var file = files[0];
-            var tempImage = System.Drawing.Image.FromStream(file.OpenReadStream());
-
-            var hasThumbnail = tempImage.Width > 255;
+            #region Internal operation
+            bool hasThumbnail;
             System.Drawing.Image tempThumbImage = null;
-            if (hasThumbnail)
+            imageStream.Position = 0;
+            using (var image = System.Drawing.Image.FromStream(imageStream))
             {
-                tempThumbImage = ImageToThumbnail(tempImage);
+                hasThumbnail = image.Width > 255;
+                if (hasThumbnail)
+                {
+                    tempThumbImage = ImageToThumbnail(image);
+                }
             }
-            
-            var hash = (new SHA1CryptoServiceProvider()).ComputeHash(file.OpenReadStream());
+
+            imageStream.Position = 0;
+            var hash = (new SHA1CryptoServiceProvider()).ComputeHash(imageStream);
             var imageModel = new Image
             {
                 Name = file.FileName,
                 MimeType = file.ContentType,
                 Sha1 = BitConverter.ToString(hash).Replace("-",""),
-                FileSize = file.Length,
+                FileSize = imageStream.Length,
                 OwnBy = await _userManager.GetUserAsync(User),
                 Album = album,
-                HasThumbnail = hasThumbnail
+                HasThumbnail = hasThumbnail,
+                Compressed = compressedByTinify
             };
 
+            // May not work if compress enabled?
             var dup = _context.Images.Where(image => image.Sha1 == imageModel.Sha1).ToList();
 
             if (dup.Count > 0)
@@ -148,12 +187,18 @@ namespace ImageHost.Controllers
             {
                 throw new Exception("No S3 bucket name was set.");
             }
+            #endregion
+            
+            #region Upload to S3
+            imageStream.Position = 0;
             var s3 = await _awsHelper.GetS3Client();
+            _logger.LogDebug("Starting upload to S3...");
+            var s3Watch = System.Diagnostics.Stopwatch.StartNew();
             await s3.PutObjectAsync(new PutObjectRequest
             {
                 BucketName = _bucketName,
                 Key = imageModel.Id,
-                InputStream = file.OpenReadStream(),
+                InputStream = imageStream,
                 ContentType = imageModel.MimeType
             });
             if (hasThumbnail)
@@ -166,8 +211,11 @@ namespace ImageHost.Controllers
                     ContentType = GetMimeTypeFromImageFormat(ImageFormat.Jpeg)
                 });
             }
+            s3Watch.Stop();
+            _logger.LogDebug($"Upload to S3 used: {s3Watch.ElapsedMilliseconds}ms");
             _context.Images.Add(imageModel);
             await _context.SaveChangesAsync();
+            #endregion
 
             return RedirectToAction(nameof(Detail), new { id = albumId });
         }

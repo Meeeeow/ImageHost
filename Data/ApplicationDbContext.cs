@@ -33,6 +33,10 @@ namespace ImageHost.Data
                 {
                     Key = Data.Settings.DisableUserRegistration,
                     Val = false.ToString()
+                }, new Setting
+                {
+                    Key = Data.Settings.EnableTinifyCompress,
+                    Val = false.ToString()
                 });
             
             base.OnModelCreating(builder);

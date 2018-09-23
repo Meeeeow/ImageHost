@@ -12,11 +12,15 @@ namespace ImageHost.Views.Settings
         public static string ActivePageKey => "ActivePage";
         public static string Index => "Index";
         public static string AwsSettings => "AwsSettings";
+        public static string TinifySettings => "TinifySettings";
         
 
 
         public static string IndexNavClass(ViewContext viewContext) => PageNavClass(viewContext, Index);
         public static string AwsSettingsNavClass(ViewContext viewContext) => PageNavClass(viewContext, AwsSettings);
+
+        public static string TinifySettingsNavClass(ViewContext viewContext) =>
+            PageNavClass(viewContext, TinifySettings);
         
 
         public static string PageNavClass(ViewContext viewContext, string page)
