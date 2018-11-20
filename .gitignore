@@ -5,5 +5,4 @@ bin
 development.db
 production.db
 obj
-Migrations
 wwwroot/css/*.min.css
