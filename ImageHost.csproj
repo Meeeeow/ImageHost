@@ -16,27 +16,14 @@
 
     <ItemGroup>
         <PackageReference Include="AWSSDK.S3" Version="3.3.21.1" />
-        <PackageReference Include="BundlerMinifier.Core" Version="2.8.391" />
+        <PackageReference Include="BuildBundlerMinifier" Version="2.8.391" />
         <PackageReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.1.3" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.3" />
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" />
         <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
         <PackageReference Include="Tinify" Version="1.5.2" />
     </ItemGroup>
 
-    <ItemGroup>
-        <DotNetCliToolReference Include="BundlerMinifier.Core" Version="2.8.391" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="Views\Home\About.cshtml" />
-      <_ContentIncludedByDefault Remove="Views\Home\Contact.cshtml" />
-      <_ContentIncludedByDefault Remove="Views\Home\Index.cshtml" />
-      <_ContentIncludedByDefault Remove="Views\Home\Privacy.cshtml" />
-    </ItemGroup>
-    
-    <Target Name="BundleResource" BeforeTargets="BeforeBuild">
-        <Message Text="### Bundle resource ###" Importance="high" />
-        <Exec Command="dotnet bundle --no-color" />
-    </Target>
+    <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" appsettings_1Development_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
 </Project>

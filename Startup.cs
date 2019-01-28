@@ -16,10 +16,22 @@ namespace ImageHost
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment CurrentEnvironment;
+
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+            
             Configuration = configuration;
+            CurrentEnvironment = env;
         }
+
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        Microsoft.AspNetCore.WebHost.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.AddEnvironmentVariables(prefix: "ASPNETCORE_");
+            })
+            .UseStartup<Startup>();
 
         public IConfiguration Configuration { get; }
 
@@ -34,8 +46,18 @@ namespace ImageHost
             });
 
             // Add EF services to the services container.
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+            string connectionString;
+            if (CurrentEnvironment.IsDevelopment())
+            {
+                
+                connectionString = Configuration.GetConnectionString("DefaultConnection");
+            } else
+            {
+                var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(Configuration.GetConnectionString("DefaultConnection"));
+                builder.Password = Configuration.GetValue<string>("MYSQL_PWD");
+                connectionString = builder.ConnectionString;
+            }
+            services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()

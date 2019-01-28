@@ -2,11 +2,14 @@ version: "3.2"
 
 services:
   web:
+    container_name: image_host
+    env_file: .env
     build:
       context: .
+      args:
+        - MYSQL_PWD=$MYSQL_PWD
     restart: always
     ports:
-    - 8080:80
-    volumes:
-    - .development.db:/app/development.db
-    - .production.db:/app/production.db
+      - 8080:80
+    environment:
+        - ASPNETCORE_MYSQL_PWD=${MYSQL_PWD}
