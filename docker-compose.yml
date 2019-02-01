@@ -1,4 +1,4 @@
-version: "3.2"
+version: "3.4"
 
 services:
   web:
@@ -8,8 +8,14 @@ services:
       context: .
       args:
         - MYSQL_PWD=$MYSQL_PWD
+      network: innernetwork
     restart: always
     ports:
       - 8080:80
     environment:
         - ASPNETCORE_MYSQL_PWD=${MYSQL_PWD}
+
+networks:
+  default:
+    external:
+      name: innernetwork
