@@ -6,3 +6,4 @@ development.db
 production.db
 obj
 wwwroot/css/*.min.css
+*.csproj.user

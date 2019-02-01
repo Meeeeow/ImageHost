@@ -8,6 +8,7 @@ using ImageHost.Models.SettingsViewModels;
 using Amazon.Runtime.CredentialManagement;
 using ImageHost.Data;
 using ImageHost.Services;
+using ImageHost.Utils;
 
 namespace ImageHost.Controllers
 {
@@ -79,10 +80,10 @@ namespace ImageHost.Controllers
             if (!model.Enable) return View(model);
             
             var tinifyKey = await (_settingsHelper.Get(Settings.TinifyApiKey));
-            TinifyAPI.Tinify.Key = tinifyKey;
+            var tinify = new Tinify(tinifyKey);
             try
             {
-                await TinifyAPI.Tinify.Validate();
+                await tinify.ValidateKey();
                 model.ApiKeyValid = true;
             }
             catch
@@ -90,7 +91,7 @@ namespace ImageHost.Controllers
                 model.ApiKeyValid = false;
             }
 
-            model.CompressedCount = TinifyAPI.Tinify.CompressionCount;
+            model.CompressedCount = await tinify.GetCompressionCount();
             model.ApiKey = await _settingsHelper.Get(Settings.TinifyApiKey);
 
             return View(model);
@@ -166,7 +167,7 @@ namespace ImageHost.Controllers
         public async Task<IActionResult> SetS3BucketName(AwsViewModel model)
         {
             await _settingsHelper.Write(Settings.S3BucketName, model.SetS3BucketViewModel.BucketName);
-
+            StatusMessage = $"Successful set bucket name to {model.SetS3BucketViewModel.BucketName}";
             return RedirectToAction(nameof(AwsSettings));
         }
 
@@ -185,8 +186,10 @@ namespace ImageHost.Controllers
                 AccessKey = model.AddProfileViewModel.AccessKey,
                 SecretKey = model.AddProfileViewModel.SecretKey
             };
-            var profile = new CredentialProfile(model.AddProfileViewModel.ProfileName, options);
-            profile.Region = RegionEndpoint.GetBySystemName(model.AddProfileViewModel.Region);
+            var profile = new CredentialProfile(model.AddProfileViewModel.ProfileName, options)
+            {
+                Region = RegionEndpoint.GetBySystemName(model.AddProfileViewModel.Region)
+            };
             var sharedCredentialsFile = new SharedCredentialsFile();
             sharedCredentialsFile.RegisterProfile(profile);
 

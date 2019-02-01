@@ -10,6 +10,7 @@ using ImageHost.Data;
 using ImageHost.Models;
 using ImageHost.Models.AlbumViewModels;
 using ImageHost.Services;
+using ImageHost.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -128,10 +129,11 @@ namespace ImageHost.Controllers
                 {
                     await file.CopyToAsync(ms);
                     var byteFile = ms.ToArray();
-                    TinifyAPI.Tinify.Key = await _settingsHelper.Get(Settings.TinifyApiKey);
+                    var tinifyKey = await _settingsHelper.Get(Settings.TinifyApiKey);
+                    var tinify = new Tinify(tinifyKey);
                     _logger.LogDebug("Starting upload to Tinify...");
                     var tinifyWatch = System.Diagnostics.Stopwatch.StartNew();
-                    byteFile = await TinifyAPI.SourceTaskExtensions.ToBuffer(TinifyAPI.Tinify.FromBuffer(byteFile));
+                    byteFile = await tinify.Compress(byteFile);
                     tinifyWatch.Stop();
                     _logger.LogDebug($"Upload to Tinify used: {tinifyWatch.ElapsedMilliseconds}ms");
                     imageStream = new MemoryStream(byteFile);
