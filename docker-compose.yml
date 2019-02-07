@@ -11,11 +11,16 @@ services:
       network: innernetwork
     restart: always
     ports:
-      - 8080:80
+      - 3010:80
     environment:
         - ASPNETCORE_MYSQL_PWD=${MYSQL_PWD}
+    volumes:
+      - aws_config:/root/.aws
 
 networks:
   default:
     external:
       name: innernetwork
+
+volumes:
+  aws_config:
