@@ -7,3 +7,4 @@ production.db
 obj
 wwwroot/css/*.min.css
 *.csproj.user
+.env*
