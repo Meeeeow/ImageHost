@@ -20,10 +20,11 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.1" />
+        <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.0.96" />
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.0.0" />
         <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
         <PackageReference Include="System.Drawing.Common" Version="4.6.1" />
     </ItemGroup>
   
-    <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" appsettings_1Development_1json__JSONSchema="" /></VisualStudio></ProjectExtensions>
+    <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JSONSchema="" appsettings_1Development_1json__JSONSchema="" libman_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 </Project>

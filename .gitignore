@@ -1,8 +1,11 @@
 .vs
-.vscode
 .idea
 bin
 obj
-wwwroot/css/*.min.*
 *.csproj.user
 .env*
+
+wwwroot/**/*.min.*
+wwwroot/lib/*
+
+!**/.gitkeep
