@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,14 +12,15 @@ using ImageHost.Data;
 using ImageHost.Models;
 using ImageHost.Services;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Hosting;
 
 namespace ImageHost
 {
     public class Startup
     {
-        private readonly IHostingEnvironment CurrentEnvironment;
+        private readonly IWebHostEnvironment CurrentEnvironment;
 
-        public Startup(IConfiguration configuration, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             
             Configuration = configuration;
@@ -53,7 +55,7 @@ namespace ImageHost
                 connectionString = Configuration.GetConnectionString("DefaultConnection");
             } else
             {
-                var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(Configuration.GetConnectionString("DefaultConnection"));
+                var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("DefaultConnection"));
                 builder.Password = Configuration.GetValue<string>("MYSQL_PWD");
                 connectionString = builder.ConnectionString;
             }
@@ -106,16 +108,15 @@ namespace ImageHost
             services.AddTransient<ISettingsHelper, SettingsHelper>();
             services.AddTransient<IAwsHelper, AwsHelper>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
@@ -127,16 +128,15 @@ namespace ImageHost
             
             // app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseRouting();
             app.UseCookiePolicy();
             app.UseAuthentication();
+            app.UseAuthorization();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}",
-                    defaults: new { Controller = "Album" }
-                );
+                endpoints.MapControllers();
+                endpoints.MapControllerRoute("default", "{controller=Album}/{action=Index}/{id?}");
             });
         }
     }

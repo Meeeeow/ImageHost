@@ -2,9 +2,7 @@
 .vscode
 .idea
 bin
-development.db
-production.db
 obj
-wwwroot/css/*.min.css
+wwwroot/css/*.min.*
 *.csproj.user
 .env*
