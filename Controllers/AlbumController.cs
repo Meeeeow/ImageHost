@@ -93,6 +93,8 @@ namespace ImageHost.Controllers
 
             if (album == null) return NotFound();
             if (!await HasPermissionTo(album)) return Forbid();
+
+            album.Images = album.Images.OrderByDescending(i => i.UploadTimeUtc).ToList();
             
             return View(new DetailViewModel
             {
